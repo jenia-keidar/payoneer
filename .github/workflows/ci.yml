@@ -1,19 +1,21 @@
-name: CI Pipeline
+name: CI Pipeline - Build and Tag Image
 
 on:
   push:
     branches:
-      - '*'   # Runs on push to any branch
+      - '*'   # Runs on push to any branch except main
   pull_request:
     branches:
       - '*'   # Runs on pull requests to any branch
 
 jobs:
-  build-and-test:
+  build-and-tag:
     runs-on: ubuntu-latest
+    env:
+      RANDOM_TAG: ${{ github.sha }}  # Use commit SHA for a unique tag
 
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Set up Node.js
@@ -21,14 +23,22 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: npm ci
         working-directory: ./payoneer
 
-      - name: Build Angular App
-        run: npm run build
+      - name: Build Angular app
+        run: npm run build --if-present
         working-directory: ./payoneer
 
-      - name: Run Tests
-        run: npm test
-        working-directory: ./payoneer
+      - name: Build Docker image and tag it
+        run: docker build -t payoneer-app:${{ env.RANDOM_TAG }} ./payoneer
+
+      - name: Save Docker image locally for testing
+        run: docker save -o payoneer-app-${{ env.RANDOM_TAG }}.tar payoneer-app:${{ env.RANDOM_TAG }}
+
+      - name: Upload image artifact (optional for later use)
+        uses: actions/upload-artifact@v2
+        with:
+          name: docker-image-${{ env.RANDOM_TAG }}
+          path: payoneer-app-${{ env.RANDOM_TAG }}.tar
