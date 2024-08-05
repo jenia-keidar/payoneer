@@ -3,7 +3,7 @@ name: CD Pipeline - Deploy with Ansible
 on:
   push:
     branches:
-      - master   # Runs only when pushing to master branch
+      - master
 
 jobs:
   deploy:
