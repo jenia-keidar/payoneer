@@ -1,40 +1,49 @@
-name: CD Pipeline - Deploy Docker Image to EC2
+name: CD Pipeline - Deploy with Ansible
 
 on:
   workflow_run:
-    workflows: ["CI Pipeline - Build, Test, and Prepare"]
+    workflows: ["CI Pipeline"]  # Triggered after CI Pipeline
     types:
       - completed
 
 jobs:
-  cd-pipeline:
+  deploy:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Build Docker image for deployment
-        run: docker build -t payoneer-app ./payoneer
-
-      - name: Save Docker image locally
-        run: docker save -o payoneer-app.tar payoneer-app
-
-      - name: Transfer Docker image to EC2
+      - name: Set Up SSH Key
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          scp -o StrictHostKeyChecking=no payoneer-app.tar ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/centos/
 
-      - name: Deploy Docker image on EC2
+      - name: Generate Ansible Inventory File
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            docker load -i /home/centos/payoneer-app.tar
-            if [ "$(docker ps -aq -f name=payoneer-app)" ]; then
-              docker stop payoneer-app
-              docker rm payoneer-app
-            fi
-            docker run -d --name payoneer-app -p 80:80 payoneer-app
-          EOF
+          echo "[centos]" > payoneer/ansible/inventory.ini
+          echo "${{ secrets.EC2_HOST }} ansible_user=${{ secrets.EC2_USER }} ansible_ssh_private_key_file=~/.ssh/id_rsa" >> payoneer/ansible/inventory.ini
+
+      - name: Build Docker Image
+        run: docker build -t jenia-keidar/payoneer-app ./payoneer
+
+      - name: Save Docker Image to File
+        run: docker save jenia-keidar/payoneer-app -o jenia-keidar/payoneer-app.tar
+
+      - name: Transfer Docker Image to EC2
+        run: |
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa jenia-keidar/payoneer-app.tar ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/centos/
+
+      - name: Deploy with Ansible
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: payoneer/ansible/ansible.yml
+          inventory: payoneer/ansible/inventory.ini
+          key: ~/.ssh/id_rsa
+
+      - name: Load Docker Image and Run Container on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
+          "docker load -i /home/centos/jenia-keidar/payoneer-app.tar && \
+          docker run -d --name payoneer-app -p 80:80 jenia-keidar/payoneer-app"

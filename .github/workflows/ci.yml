@@ -1,4 +1,4 @@
-name: CI Pipeline - Build, Test, and Prepare
+name: CI Pipeline
 
 on:
   push:
@@ -9,36 +9,26 @@ on:
       - '*'   # Runs on pull requests to any branch
 
 jobs:
-  ci-pipeline:
+  build-and-test:
     runs-on: ubuntu-latest
-    env:
-      NODE_VERSION: '18'
+
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Setup Node.js environment
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '18'
 
-      - name: Install project dependencies
+      - name: Install Dependencies
         run: npm ci
         working-directory: ./payoneer
 
-      - name: Build Angular application
-        run: npm run build --if-present
+      - name: Build Angular App
+        run: npm run build
         working-directory: ./payoneer
 
-      - name: Run unit tests
-        run: npm test -- --no-watch --no-progress --browsers=ChromeHeadless
+      - name: Run Tests
+        run: npm test
         working-directory: ./payoneer
-
-      - name: Archive build artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: angular-build
-          path: |
-            ./payoneer/dist/
-            !./payoneer/dist/*.map
-          retention-days: 5
