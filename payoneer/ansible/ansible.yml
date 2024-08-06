@@ -31,8 +31,7 @@
         state: started
         enabled: yes
       changed_when: false
-## add all containers then  docker images -- docker rm -f $(docker ps -aq) docker rmi (all)
-
+      
     - name: Delete all containers and Images
       command: |
         docker rm -f $(docker ps -aq) 

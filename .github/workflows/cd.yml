@@ -52,10 +52,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y python3 python3-pip
 
-      - name: Install Ansible
+      - name: Install Ansible and add config
         run: |
           sudo apt update
           sudo apt install -y ansible
+          ansible-config init --disabled > ansible.cfg
+          which python3
+          python3 --version
 
       - name: Generate Ansible Inventory Inline
         run: |
@@ -65,17 +68,18 @@ jobs:
       - name: Run Ansible Playbook Manually
         run: |
           python --version
+          ansible-playbook --version
           ansible-playbook -i inventory.ini payoneer/ansible/ansible.yml --extra-vars "ansible_python_interpreter=/usr/bin/python"
 
 
 
-      - name: Deploy with Ansible
-        uses: dawidd6/action-ansible-playbook@v2
-        with:
-          playbook: payoneer/ansible/ansible.yml
-          inventory: inventory.ini
+      # - name: Deploy with Ansible
+      #   uses: dawidd6/action-ansible-playbook@v2
+      #   with:
+      #     playbook: payoneer/ansible/ansible.yml
+      #     inventory: inventory.ini
 
       - name: Deploy Docker Container on EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
-          "docker run -d --name payoneer-app -p 4200:4200 jenia-keidar/payoneer-app:latest"
+          "docker run -d --name payoneer-app -p 80:4200 evgeny412/payoneer-exam:master"
