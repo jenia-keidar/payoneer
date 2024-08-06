@@ -12,6 +12,7 @@
       loop:
         - yum clean all
         - yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+      warn: false
       changed_when: false
 
     - name: Install Docker packages
