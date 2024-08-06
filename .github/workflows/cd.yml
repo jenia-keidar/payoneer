@@ -20,6 +20,8 @@ jobs:
           mkdir -p ~/.ssh  
           echo "${{ secrets.EC2_SSH_KEY }}" > private.pem  
           chmod 600 private.pem 
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
 
       - name: Build Docker image with a specific tag
         run: docker build -t jenia-keidar/payoneer-app:latest ./payoneer
