@@ -61,6 +61,6 @@ jobs:
         with:
           context: ./payoneer
           file: ./payoneer/Dockerfile
-          push: true
+          push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

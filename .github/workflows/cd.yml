@@ -22,12 +22,28 @@ jobs:
           chmod 600 private.pem 
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }} 
 
-      - name: Generate Ansible Inventory Inline
-        run: |
-          echo "[all]" > inventory.ini
-          echo "${{ secrets.EC2_HOST }} ansible_user=${{ secrets.EC2_USER }} ansible_ssh_private_key_file=private.pem" >> inventory.ini
-          cat ./inventory.ini
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: evgeny412/payoneer-exam
+
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: ./payoneer
+          file: ./payoneer/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
 
       - name: Install Ansible
         run: |
@@ -39,8 +55,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y python3 python3-pip
 
+      - name: Generate Ansible Inventory Inline
+        run: |
+          echo "[all]" > inventory.ini
+          echo "${{ secrets.EC2_HOST }} ansible_user=${{ secrets.EC2_USER }} ansible_ssh_private_key_file=private.pem" >> inventory.ini
+
       - name: Run Ansible Playbook Manually
         run: |
+          python --version
+          ansible --version
+          ansible-playbook --version
           ansible-playbook -i inventory.ini payoneer/ansible/ansible.yml
 
 

@@ -30,9 +30,15 @@
         state: started
         enabled: yes
       changed_when: false
+## add all containers then  docker images -- docker rm -f $(docker ps -aq) docker rmi (all)
 
+    - name: Delete all containers and Images
+      command: |
+        docker rm -f $(docker ps -aq) 
+        docker rmi cker rmi 
+      
     - name: Verify Docker is running
-      command: docker run -rm -d -p 80:80 -name web nginx
+      command: docker run -rm -d -p 80:4200 -name web evgeny412/payoneer-exam:master
       register: docker_verify
       changed_when: false
 
