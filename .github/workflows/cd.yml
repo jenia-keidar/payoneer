@@ -9,7 +9,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout code
@@ -22,24 +22,25 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Build Docker image with a specific tag
+        run: docker build -t jenia-keidar/payoneer-app:latest ./payoneer
+
       - name: Generate Ansible Inventory Inline
         run: |
           echo "[centos]" > inventory.ini
           echo "${{ secrets.EC2_HOST }} ansible_user=${{ secrets.EC2_USER }} ansible_ssh_private_key_file=~/.ssh/id_rsa" >> inventory.ini
 
-      - name: Build Docker image with a specific tag
-        run: docker build -t jenia-keidar/payoneer-app:latest ./payoneer
-
-      - name: Set Up Python Environment
+      - name: Install Ansible
         run: |
-          sudo apt-get update
-          sudo apt-get install -y python3 python3-pip
-          python3 -m pip install --upgrade pip
-          python3 -m pip install ansible
+          sudo apt update
+          sudo apt install -y ansible
 
-      - name: Run Ansible Playbook for Docker Deployment
-        run: |
-          ansible-playbook -i inventory.ini payoneer/ansible/ansible.yml --private-key ~/.ssh/id_rsa
+      - name: Deploy with Ansible
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: payoneer/ansible/ansible.yml
+          inventory: inventory.ini
+          key: ~/.ssh/id_rsa
 
       - name: Deploy Docker Container on EC2
         run: |
