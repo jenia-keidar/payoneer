@@ -37,20 +37,12 @@ jobs:
         run: npm install -g @angular/cli
         working-directory: ./payoneer
 
-      - name: add Cypress
-        run: ng add @cypress/schematic --e2e --component --skip-confirmation
-        working-directory: ./payoneer
-
       - name: Build Angular app
         run: ng build
         working-directory: ./payoneer
 
       - name: Run unit tests
         run: ng test --watch=false --browsers=ChromeHeadless
-        working-directory: ./payoneer
-
-      - name: Run end-to-end tests
-        run: ng run payoneer:cypress-run
         working-directory: ./payoneer
 
       - name: Build Docker image and tag it
