@@ -33,7 +33,7 @@
       changed_when: false
 
     - name: Delete all containers and Images
-      command: |
+      shell: |
         docker rm -f $(docker ps -aq) 
         docker rmi -f $(docker images -q)
       
