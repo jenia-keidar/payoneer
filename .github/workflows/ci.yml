@@ -43,9 +43,6 @@ jobs:
         run: ng test --watch=false --browsers=ChromeHeadless
         working-directory: ./payoneer
 
-      # - name: Build Docker image and tag it
-      #   run: docker build -t payoneer-app:${{ env.RANDOM_TAG }} ./payoneer
-
       - name: Log in to Docker Hub
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
         with:
