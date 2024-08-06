@@ -43,14 +43,27 @@ jobs:
         run: ng test --watch=false --browsers=ChromeHeadless
         working-directory: ./payoneer
 
-      - name: Build Docker image and tag it
-        run: docker build -t payoneer-app:${{ env.RANDOM_TAG }} ./payoneer
+      # - name: Build Docker image and tag it
+      #   run: docker build -t payoneer-app:${{ env.RANDOM_TAG }} ./payoneer
 
-      - name: Save Docker image locally for testing
-        run: docker save -o payoneer-app-${{ env.RANDOM_TAG }}.tar payoneer-app:${{ env.RANDOM_TAG }}
-
-      - name: Upload image artifact (optional for later use)
-        uses: actions/upload-artifact@v2
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
         with:
-          name: docker-image-${{ env.RANDOM_TAG }}
-          path: payoneer-app-${{ env.RANDOM_TAG }}.tar
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }} 
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: evgeny412/payoneer-exam
+
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: ./payoneer
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
