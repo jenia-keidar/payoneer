@@ -4,6 +4,7 @@
   become: yes
   vars:
     log_file: "/var/log/docker_install_ansible.log"
+    ansible_python_interpreter: /usr/bin/python
 
   tasks:     
     - name: Clean yum cache and add Docker repo
