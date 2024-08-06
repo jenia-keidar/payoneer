@@ -54,7 +54,7 @@
 
       
     - name: Verify Docker is running
-      command: docker run -rm -d -p 80:4200 -name web evgeny412/payoneer-exam:master
+      command: docker run --rm -d -p 80:4200 --name web evgeny412/payoneer-exam:master
       register: docker_verify
       changed_when: false
 
