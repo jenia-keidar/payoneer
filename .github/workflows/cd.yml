@@ -23,9 +23,6 @@ jobs:
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
 
-      - name: Build Docker image with a specific tag
-        run: docker build -t jenia-keidar/payoneer-app:latest ./payoneer
-
       - name: Generate Ansible Inventory Inline
         run: |
           echo "[all]" > inventory.ini
