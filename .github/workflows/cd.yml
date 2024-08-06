@@ -19,8 +19,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh  
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa  
-          chmod 600 ~/.ssh/id_rsa  
-
+          chmod 600 ~/.ssh/id_rsa
 
       - name: Generate Ansible Inventory Inline
         run: |
@@ -30,18 +29,6 @@ jobs:
       - name: Build Docker image with a specific tag
         run: docker build -t jenia-keidar/payoneer-app:latest ./payoneer
 
-      - name: Save Docker Image as a Tar File
-        run: docker save -o jenia-keidar-payoneer-app.tar jenia-keidar/payoneer-app:latest
-
-      - name: Transfer Docker Image to EC2
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          scp -o StrictHostKeyChecking=no jenia-keidar-payoneer-app.tar ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/centos/
-
       - name: Run Ansible Playbook for Docker Deployment
         run: |
           ansible-playbook -i inventory.ini payoneer/ansible/ansible.yml --private-key ~/.ssh/id_rsa
@@ -49,8 +36,4 @@ jobs:
       - name: Deploy Docker Container on EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
-          "docker load -i /home/centos/jenia-keidar-payoneer-app.tar && \
-          if [ \$(docker ps -aq -f name=payoneer-app) ]; then \
-            docker stop payoneer-app && docker rm payoneer-app; \
-          fi && \
-          docker run -d --name payoneer-app -p 4200:4200 jenia-keidar/payoneer-app:latest"
+          "docker run -d --name payoneer-app -p 4200:4200 jenia-keidar/payoneer-app:latest"
