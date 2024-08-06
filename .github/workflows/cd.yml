@@ -6,10 +6,13 @@ on:
     workflows: ["ci"]
     types:
       - completed
+  push:
+    branches:
+      - master
 
 jobs:
   deploy:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -44,27 +47,24 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+      - name: Install Python on GitHub Actions Runner
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-pip
 
       - name: Install Ansible
         run: |
           sudo apt update
           sudo apt install -y ansible
 
-      - name: Install Python on GitHub Actions Runner
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3 python3-pip
-
       - name: Generate Ansible Inventory Inline
         run: |
           echo "[all]" > inventory.ini
-          echo "${{ secrets.EC2_HOST }} ansible_user=${{ secrets.EC2_USER }} ansible_ssh_private_key_file=private.pem" >> inventory.ini
+          echo "${{ secrets.EC2_HOST }} ansible_user=${{ secrets.EC2_USER }} ansible_ssh_private_key_file=private.pem ansible_python_interpreter=/usr/bin/python3" >> inventory.ini
 
       - name: Run Ansible Playbook Manually
         run: |
           python --version
-          ansible --version
-          ansible-playbook --version
           ansible-playbook -i inventory.ini payoneer/ansible/ansible.yml
 
 
