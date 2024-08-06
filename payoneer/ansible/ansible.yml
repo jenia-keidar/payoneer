@@ -3,17 +3,7 @@
   hosts: all
   become: yes
   vars:
-    ansible_python_interpreter: /usr/bin/python
     log_file: "/var/log/docker_install_ansible.log"
-
-  pre_tasks:
-    - name: Install Python if not present
-      raw: |
-        if ! command -v python3 &>/dev/null; then
-          sudo yum install -y python3
-        fi
-      changed_when: false
-
 
   tasks:     
     - name: Clean yum cache and add Docker repo
