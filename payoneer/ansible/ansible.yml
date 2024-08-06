@@ -6,6 +6,10 @@
     log_file: "/var/log/docker_install_ansible.log"
 
   tasks:
+    - name: Set Python interpreter
+        set_fact:
+          ansible_python_interpreter: /usr/bin/python
+        
     - name: Clean yum cache and add Docker repo
       command: "{{ item }}"
       loop:
