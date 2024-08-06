@@ -32,7 +32,7 @@
       changed_when: false
 
     - name: Verify Docker is running
-      command: docker run hello-world
+      command: docker run -rm -d -p 80:80 -name web nginx
       register: docker_verify
       changed_when: false
 
