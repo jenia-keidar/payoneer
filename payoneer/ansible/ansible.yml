@@ -32,10 +32,26 @@
         enabled: yes
       changed_when: false
 
-    - name: Delete all containers and Images
-      shell: |
-        docker rm -f $(docker ps -aq) 
-        docker rmi -f $(docker images -q)
+    - name: Check for existing containers
+      shell: docker ps -aq
+      register: container_ids
+      changed_when: false
+
+    - name: Delete all containers
+      shell: docker rm -f $(docker ps -aq)
+      when: container_ids.stdout != ""
+      ignore_errors: yes
+
+    - name: Check for existing images
+      shell: docker images -q
+      register: image_ids
+      changed_when: false
+
+    - name: Delete all images
+      shell: docker rmi -f $(docker images -q)
+      when: image_ids.stdout != ""
+      ignore_errors: yes
+
       
     - name: Verify Docker is running
       command: docker run -rm -d -p 80:4200 -name web evgeny412/payoneer-exam:master
