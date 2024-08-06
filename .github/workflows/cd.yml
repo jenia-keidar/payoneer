@@ -24,14 +24,14 @@ jobs:
       - name: Generate Ansible Inventory Inline
         run: |
           echo "[centos]" > inventory.ini
-          echo "${{ secrets.EC2_HOST }} ansible_user=${{ secrets.EC2_USER }} ansible_ssh_private_key_file=~/.ssh/id_rsa" >> inventory.ini
+          echo "${{ secrets.EC2_HOST }} ansible_user=${{ secrets.EC2_USER }} ansible_ssh_private_key_file=${{ secrets.EC2_SSH_KEY }}" >> inventory.ini
 
       - name: Build Docker image with a specific tag
         run: docker build -t jenia-keidar/payoneer-app:latest ./payoneer
 
       - name: Run Ansible Playbook for Docker Deployment
         run: |
-          ansible-playbook -i inventory.ini payoneer/ansible/ansible.yml --private-key ~/.ssh/id_rsa
+          ansible-playbook -i inventory.ini payoneer/ansible/ansible.yml
 
       - name: Deploy Docker Container on EC2
         run: |
