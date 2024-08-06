@@ -7,8 +7,6 @@ on:
   pull_request:
     branches:
       - '*'   # Runs on pull requests to any branch
-  issue_comment:
-    types: [created]
 
 jobs:
   build-test-tag:
