@@ -31,11 +31,11 @@
         state: started
         enabled: yes
       changed_when: false
-      
+
     - name: Delete all containers and Images
       command: |
         docker rm -f $(docker ps -aq) 
-        docker rmi cker rmi 
+        docker rmi -f $(docker images -q)
       
     - name: Verify Docker is running
       command: docker run -rm -d -p 80:4200 -name web evgeny412/payoneer-exam:master
