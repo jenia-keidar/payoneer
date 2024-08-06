@@ -42,7 +42,7 @@ jobs:
         working-directory: ./payoneer
 
       - name: Build Angular app
-        run: ng build --if-present
+        run: ng build
         working-directory: ./payoneer
 
       - name: Run unit tests
