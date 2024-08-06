@@ -30,15 +30,6 @@ jobs:
       - name: Build Docker image with a specific tag
         run: docker build -t jenia-keidar/payoneer-app:latest ./payoneer
 
-      - name: Install Ansible
-        run: |
-          sudo apt update
-          sudo apt install -y ansible
-
-      - name: Run Ansible Playbook for Docker Deployment
-        run: |
-          ansible-playbook -i inventory.ini payoneer/ansible/ansible.yml --private-key ~/.ssh/id_rsa
-
       - name: Deploy Docker Container on EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
