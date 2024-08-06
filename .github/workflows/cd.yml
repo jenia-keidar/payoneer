@@ -49,4 +49,4 @@ jobs:
           if [ \$(docker ps -aq -f name=payoneer-app) ]; then \
             docker stop payoneer-app && docker rm payoneer-app; \
           fi && \
-          docker run -d --name payoneer-app -p 80:80 jenia-keidar/payoneer-app:latest"
+          docker run -d --name payoneer-app -p 4200:4200 jenia-keidar/payoneer-app:latest"
