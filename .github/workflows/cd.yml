@@ -20,21 +20,25 @@ jobs:
           mkdir -p ~/.ssh  
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa  
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
       - name: Build Docker image with a specific tag
         run: docker build -t jenia-keidar/payoneer-app:latest ./payoneer
 
       - name: Generate Ansible Inventory Inline
         run: |
-          echo "[all]" > ./inventory.ini
-          echo "${{ secrets.EC2_HOST }} ansible_user=${{ secrets.EC2_USER }} ansible_ssh_private_key_file=~/.ssh/id_rsa" >> ./inventory.ini
+          echo "[all]" > inventory.ini
+          echo "${{ secrets.EC2_HOST }} ansible_user=${{ secrets.EC2_USER }} ansible_ssh_private_key_file=~/.ssh/id_rsa" >> inventory.ini
           cat ./inventory.ini
 
       - name: Install Ansible
         run: |
           sudo apt update
           sudo apt install -y ansible
+
+      - name: Run Ansible Playbook Manually
+        run: |
+          ansible-playbook -i inventory.ini payoneer/ansible/ansible.yml
+
 
       - name: Deploy with Ansible
         uses: dawidd6/action-ansible-playbook@v2
