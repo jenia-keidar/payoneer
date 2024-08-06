@@ -71,7 +71,3 @@ jobs:
           ansible-playbook --version
           ansible-playbook -i inventory.ini payoneer/ansible/ansible.yml --extra-vars "ansible_python_interpreter=/usr/bin/python"
 
-      - name: Deploy Docker Container on EC2
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
-          "docker run -d --name payoneer-app -p 80:4200 evgeny412/payoneer-exam:master"
