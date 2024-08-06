@@ -1,9 +1,9 @@
-name: CD Pipeline - Deploy Docker Image
+name: cd
 
 on:
   workflow_dispatch: {}
   workflow_run:
-    workflows: ["CI Pipeline - Build, Test, and Tag Image"]
+    workflows: ["ci"]
     types:
       - completed
 
