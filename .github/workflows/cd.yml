@@ -29,7 +29,7 @@ jobs:
       - name: Generate Ansible Inventory Inline
         run: |
           echo "[all]" > inventory.ini
-          echo "${{ secrets.EC2_HOST }} ansible_user=${{ secrets.EC2_USER }} ansible_ssh_private_key_file=private.pem" >> inventory.ini
+          echo "${{ secrets.EC2_HOST }} ansible_user=${{ secrets.EC2_USER }} ansible_ssh_private_key_file=private.pem ansible_python_interpreter=/usr/bin/python" >> inventory.ini
           cat ./inventory.ini
 
       - name: Install Ansible
@@ -51,7 +51,7 @@ jobs:
         uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: payoneer/ansible/ansible.yml
-          inventory: ./inventory.ini
+          inventory: inventory.ini
 
       - name: Deploy Docker Container on EC2
         run: |
