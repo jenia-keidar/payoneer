@@ -16,7 +16,7 @@ jobs:
       (github.event_name == 'push')
     runs-on: ubuntu-latest
     env:
-      RANDOM_TAG: ${{ github.sha }}  # Use commit SHA for a unique tag
+      RANDOM_TAG: ${{ github.sha }} 
 
     steps:
       - name: Checkout code
